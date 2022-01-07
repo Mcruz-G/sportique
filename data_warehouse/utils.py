@@ -32,3 +32,13 @@ queries = {
     "nba_live" : """SELECT * FROM NBA_LIVE
                      """,
 }
+
+def load_game_ids():
+    pass
+
+def load_team_ids():
+    pass
+
+def nba_live_data():
+    pass
+
