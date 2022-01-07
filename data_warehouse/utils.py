@@ -28,4 +28,7 @@ queries = {
                      
     "game_ids" : """SELECT * FROM GAME_IDS
                      """,
+
+    "nba_live" : """SELECT * FROM NBA_LIVE
+                     """,
 }

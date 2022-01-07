@@ -1,7 +1,7 @@
 from contextlib import ExitStack
 import requests 
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from nba_api.stats.static import teams
 from nba_api.stats.endpoints import leaguegamefinder
 from utils import db_paths, play_by_play_url, headers, queries
@@ -54,12 +54,18 @@ def get_game_ids(games, db_name, db_engine):
     game_ids = pd.DataFrame()
     game_ids["GAME_ID"] = new_game_ids
     game_ids["GAME_DATE"] = 0
+    game_ids["HOME_TEAM_NAME"] = ""
+    game_ids["AWAY_TEAM_NAME"] = ""
     
     if len(game_ids) > 0:
-        for idx in games.index:
+        for idx in tqdm(games.index):
             id = games["GAME_ID"][idx]
+            home_team_name = games[games["GAME_ID"] == id]["TEAM_NAME"].values[0]
+            away_team_name = games[games["GAME_ID"] == id]["TEAM_NAME"].values[1]
             game_ids["GAME_DATE"][idx] = games[games["GAME_ID"] == id]["GAME_DATE"].values[0]
-            print(f"Loading new id: {id}")
+            game_ids["HOME_TEAM_NAME"][idx] = home_team_name
+            game_ids["AWAY_TEAM_NAME"][idx] = away_team_name
+            print(f"Loading new game: {home_team_name} vs. {away_team_name}; GAME ID={id}")
     return game_ids
 
 def update_teams_db(season, league_id, season_type):
@@ -78,13 +84,15 @@ def update_games_db(season, league_id, season_type):
     game_ids.to_sql("GAME_IDS", db_engine, index=False, if_exists="append")
 
 def update_nba_live_db():
-    #TODO check for already existing games and filter game_ids
     games_db_engine = create_engine(db_paths["games_db"])
     stored_game_ids_data = pd.read_sql(queries["game_ids"], games_db_engine)
     game_ids = list(stored_game_ids_data["GAME_ID"].values)
     db_name = db_paths["nba_live_db"]
     db_engine = create_engine(db_name)
+    current_game_ids = inspect(db_engine).get_table_names()
+    game_ids = list(filter(lambda d: d not in current_game_ids, game_ids))
     print("Updating NBA LIVE Database")
+
     for id in tqdm(game_ids):
         url = play_by_play_url + str(id) + ".json"
         response = requests.get(url=url).json()
@@ -100,10 +108,6 @@ def update_nba_live_db():
         nba_live_data["FOUL_TECHNICAL"] = play_by_play_data["foulTechnicalTotal"]
         nba_live_data["FOUL_PERSONAL"] = play_by_play_data["foulPersonalTotal"]
 
-        # print(play_by_play_data.info())
-        # print(nba_live_data.columns)
-        # print(nba_live_data.info())
-        # print(nba_live_data.describe())
         nba_live_data.to_sql(name=id, con=db_engine, index=False, if_exists="append")
 
 def update_db():
