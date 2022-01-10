@@ -21,12 +21,13 @@ if __name__ == "__main__":
     nba_live_data = load_nba_live_data(game_ids, home_team, away_team, date)
     
     st.subheader("")    
-    build_get_today_games_button(game_ids)
+    build_plot_score_button(nba_live_data)
     st.subheader("")
     
     st.subheader("")    
-    build_plot_score_button(nba_live_data)
+    build_get_today_games_button(game_ids)
     st.subheader("")
+    
 
     st.subheader("... Talk to our admin if you'd like to add any functionality :)")
     update_db()

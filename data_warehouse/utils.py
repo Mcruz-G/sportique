@@ -71,7 +71,8 @@ def load_nba_live_data(game_ids, home_team, away_team, date):
         engine = create_engine(db_name)
         nba_live_data = pd.read_sql(id, engine, parse_dates=["TIME_ACTUAL"])
         nba_live_data["TIME_ACTUAL"] = nba_live_data["TIME_ACTUAL"].apply(lambda x: x.to_pydatetime())
-        nba_live_data["TOTAL_SCORE"] = (nba_live_data["SCORE_HOME"] + nba_live_data["SCORE_AWAY"]).fillna(method="ffill")
+        nba_live_data = nba_live_data.sort_values(by="TIME_ACTUAL")
+        nba_live_data["TOTAL_SCORE"] = (nba_live_data["SCORE_HOME"].astype(float) + nba_live_data["SCORE_AWAY"].astype(float))
         columns = ["TIME_ACTUAL", "PERIOD", "SCORE_HOME", "SCORE_AWAY", "TOTAL_SCORE"]
         curr_columns = list(nba_live_data.columns)
         curr_columns = list(filter(lambda d: d not in columns, curr_columns))
