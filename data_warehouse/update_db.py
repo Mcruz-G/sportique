@@ -12,6 +12,7 @@ from .data_warehouse_utils import db_paths, play_by_play_url, queries, load_nba_
 def get_games(season, league_id, season_type):
     gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable=season, league_id_nullable=league_id, season_type_nullable=season_type)
     games = gamefinder.get_data_frames()[0]
+
     return games
 
 def get_teams_data(games):
@@ -45,14 +46,19 @@ def get_teams_data(games):
     return teams_data
 
 def get_game_ids(games, db_engine):
+    today = datetime.now().date()
+    today = datetime.strftime(today, "%Y-%m-%d")
+    
     incoming_game_ids = sorted(list(set(list(games["GAME_ID"].values))))
+    most_recent_games = sorted(list(set(list(games[games["GAME_DATE"] >= today ]))))
+
     try:
         stored_game_ids_data = pd.read_sql(queries["game_ids"], db_engine)
         stored_game_ids = list(stored_game_ids_data["GAME_ID"].values)
     except:
         stored_game_ids = []
     
-    new_game_ids = list(set(incoming_game_ids)-set(stored_game_ids))
+    new_game_ids = list(filter(lambda d: d in most_recent_games or d not in stored_game_ids, incoming_game_ids))
 
     game_ids = pd.DataFrame()
     game_ids["GAME_ID"] = new_game_ids
@@ -106,6 +112,10 @@ def update_nba_live_db():
         response = requests.get(url=url).json()
         play_by_play_data = pd.DataFrame(response["game"]["actions"])
         nba_live_data = pd.DataFrame()
+        nba_live_data["POSSESSION"] = play_by_play_data["possession"]
+        nba_live_data["REBOUND_DEFENSIVE"] = play_by_play_data["reboundDefensiveTotal"]
+        nba_live_data["REBOUND_OFFENSIVE"] = play_by_play_data["reboundDefensiveTotal"]
+        nba_live_data["SHOT_RESULT"] = play_by_play_data["shotResult"]
         nba_live_data["SCORE_HOME"] = play_by_play_data["scoreHome"]
         nba_live_data["SCORE_AWAY"] = play_by_play_data["scoreAway"]
         nba_live_data["PERIOD"] = play_by_play_data["period"]
