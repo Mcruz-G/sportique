@@ -15,7 +15,8 @@ import matplotlib.pyplot as plt
 def test_3qp(model_name):
     h2o.init()
 
-    game_ids = load_game_ids()#.iloc[:4]
+    game_ids = load_game_ids()
+    game_ids = game_ids.iloc[int(len(game_ids)*0.6):]
     test_data = get_test_samples(game_ids)
     print(test_data.columns)
     model_path = model_paths["3QPModel"]

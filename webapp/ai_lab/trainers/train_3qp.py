@@ -1,4 +1,5 @@
 import h2o, os, sys, shutil
+from h2o.estimators.gbm import H2OGradientBoostingEstimator
 from h2o.estimators import H2ORandomForestEstimator
 
 data_warehouse_path = os.environ["SP_DATA_WAREHOUSE_PATH"]
@@ -14,8 +15,9 @@ def train_3qp(model_name):
         shutil.rmtree(model_dir)
     
     h2o.init()
-    model = H2ORandomForestEstimator(model_name)
+    model = H2OGradientBoostingEstimator(model_name)
     game_ids = load_game_ids()
+    game_ids = game_ids.iloc[:int(len(game_ids)*0.6)]
     data = get_data(game_ids)
     model = fit_data(model, data)
     save_model(model, model_dir)
