@@ -32,11 +32,18 @@ def on_click_get_final_score_prediction(game_ids, home_team, away_team, date):
 def on_click_plot_score(nba_live_data):
     fig = px.line(nba_live_data, x="TIME_ACTUAL", y="SCORE_HOME")
     st.plotly_chart(fig)
+    home_score = nba_live_data["SCORE_HOME"].iloc[-1]
+    st.subheader(f"Current Home Score: {home_score}")
+    
     fig = px.line(nba_live_data, x="TIME_ACTUAL", y="SCORE_AWAY")
     st.plotly_chart(fig)
+    away_score = nba_live_data["SCORE_AWAY"].iloc[-1]
+    st.subheader(f"Current Visit Score: {away_score}")
+
     fig = px.line(nba_live_data, x="TIME_ACTUAL", y="TOTAL_SCORE")
     st.plotly_chart(fig)
-  
+    total_score = nba_live_data["TOTAL_SCORE"].iloc[-1]
+    st.subheader(f"Current Total Score: {total_score}")
 
 def on_click_get_today_games(game_ids):
     date = datetime.now().date()

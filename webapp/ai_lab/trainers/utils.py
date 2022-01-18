@@ -20,7 +20,7 @@ def data_process_pipeline(data):
     return data
 
 def data_process_live_pipeline(data):
-    # data = data[data["PERIOD"] == 4]
+    data = data[data["PERIOD"] <= 4]
     # data = data[data["CLOCK"] < "PT10M00.00S"]
     data = data[data["CLOCK"] > "PT05M00.00S"]
     data = data[["SPREAD", "POSSESSION", "REBOUND_DEFENSIVE", "REBOUND_OFFENSIVE",
