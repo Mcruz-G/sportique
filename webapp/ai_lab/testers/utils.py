@@ -13,7 +13,7 @@ def data_process_pipeline(data):
 
     # data["Y"] = data["TOTAL_SCORE"].shift(-50)
     # data["Y"] = data["TOTAL_SCORE"].iloc[-1]
-    data["Y"] = data["TOTAL_SCORE"].shift(-75)
+    data["Y"] = data["TOTAL_SCORE"].shift(-50)
     data = data[data["PERIOD"] == 4]
     data = data[data["CLOCK"] < "PT10M00.00S"]
     data = data[data["CLOCK"] > "PT05M00.00S"]

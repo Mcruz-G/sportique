@@ -21,7 +21,7 @@ def build_get_today_games_button(game_ids):
 
 
 def on_click_get_final_score_prediction(game_ids, home_team, away_team, date):
-    game_ids = game_ids[game_ids["GAME_DATE"] == date][game_ids["HOME_TEAM_NAME"] == home_team]
+    game_ids = game_ids[game_ids["GAME_DATE"] == date][game_ids["HOME_TEAM_NAME"] == home_team].drop_duplicates()
     live_data = get_data(game_ids, live=True)
     model_path = model_paths["3QPModel"]
     model = load_model(model_path)

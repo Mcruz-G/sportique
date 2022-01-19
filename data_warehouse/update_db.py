@@ -1,4 +1,5 @@
 from datetime import date
+from hashlib import new
 import requests 
 import pandas as pd
 from datetime import datetime
@@ -50,16 +51,16 @@ def get_game_ids(games, db_engine):
     today = datetime.strftime(today, "%Y-%m-%d")
     
     incoming_game_ids = sorted(list(set(list(games["GAME_ID"].values))))
-    most_recent_games = sorted(list(set(list(games[games["GAME_DATE"] >= today ]))))
+    most_recent_games = sorted(list(set(list(games[games["GAME_DATE"] >= today ]["GAME_ID"].values))))
 
     try:
         stored_game_ids_data = pd.read_sql(queries["game_ids"], db_engine)
         stored_game_ids = list(stored_game_ids_data["GAME_ID"].values)
     except:
+        stored_game_ids_data = pd.DataFrame()
         stored_game_ids = []
-    
     new_game_ids = list(filter(lambda d: d in most_recent_games or d not in stored_game_ids, incoming_game_ids))
-
+    new_game_ids = list(set(new_game_ids))
     game_ids = pd.DataFrame()
     game_ids["GAME_ID"] = new_game_ids
     game_ids["GAME_DATE"] = ""
@@ -75,6 +76,7 @@ def get_game_ids(games, db_engine):
             game_ids["HOME_TEAM_NAME"][idx] = home_team_name
             game_ids["AWAY_TEAM_NAME"][idx] = away_team_name
             print(f"Loading new game: {home_team_name} vs. {away_team_name}; GAME ID={id}")
+    
     return game_ids
 
 def update_teams_db(season, league_id, season_type):
@@ -90,17 +92,30 @@ def update_games_db(season, league_id, season_type):
     db_name = db_paths["games_db"]
     db_engine = create_engine(db_name)
     game_ids = get_game_ids(games, db_engine)
+    try:
+        stored_game_ids = load_game_ids()
+        stored_game_ids = list(stored_game_ids["GAME_ID"].values)
+        stored_game_ids = sorted(list(set(stored_game_ids)))
+
+        current_game_ids = list(game_ids["GAME_ID"].values)
+        current_game_ids = sorted(list(set(current_game_ids)))
+        
+        if stored_game_ids == current_game_ids:
+            return
+    except:
+        pass
     game_ids.to_sql("GAME_IDS", db_engine, index=False, if_exists="append")
 
 def update_nba_live_db():
     call_date = datetime.now().date()    
-    stored_game_ids = pd.read_sql(queries["game_ids"], create_engine(db_paths["games_db"]))
-    game_ids = list(stored_game_ids["GAME_ID"].values)
+    stored_game_ids = load_game_ids()
+    game_ids = list(set(list(stored_game_ids["GAME_ID"].values)))
+    most_recent_games = list(stored_game_ids[stored_game_ids["GAME_DATE"] == call_date]["GAME_ID"].values)
     db_name = db_paths["nba_live_db"]
     db_engine = create_engine(db_name)
     current_game_ids = inspect(db_engine).get_table_names()
-    game_ids = list(filter(lambda d: d not in current_game_ids, game_ids))
-
+    game_ids = list(filter(lambda d: d in most_recent_games or d not in current_game_ids, game_ids))
+    game_ids = list(set(game_ids))
     print("Updating NBA LIVE Database")
     log_db_name = db_paths["logs_db"]
     log_db_engine = create_engine(log_db_name)
