@@ -1,10 +1,15 @@
 import streamlit as st
 from datetime import datetime
 import plotly.express as px
-from .ai_lab.trainers.utils import get_data, load_model, model_paths
+from .ai_lab.trainers.utils import get_3qp_data, load_model, model_paths
 from .utils import build_prediction_display
 
 def build_get_final_score_prediction_button(game_ids, home_team, away_team, date):
+    build_get_final_score_prediction_button = st.button("Predict Score 10 mins ahead")
+    if build_get_final_score_prediction_button:
+        on_click_get_final_score_prediction(game_ids, home_team, away_team, date)    
+
+def build_get_final_score_prediction_button_2(game_ids, home_team, away_team, date):
     build_get_final_score_prediction_button = st.button("Predict Score 10 mins ahead")
     if build_get_final_score_prediction_button:
         on_click_get_final_score_prediction(game_ids, home_team, away_team, date)    
@@ -22,12 +27,19 @@ def build_get_today_games_button(game_ids):
 
 def on_click_get_final_score_prediction(game_ids, home_team, away_team, date):
     game_ids = game_ids[game_ids["GAME_DATE"] == date][game_ids["HOME_TEAM_NAME"] == home_team].drop_duplicates()
-    live_data = get_data(game_ids, live=True)
+    live_data = get_3qp_data(game_ids, live=True)
     model_path = model_paths["3QPModel"]
     model = load_model(model_path)
     pred = model.predict(live_data).as_data_frame()
     build_prediction_display(pred, live_data)
 
+def on_click_get_final_score_prediction(game_ids, home_team, away_team, date):
+    game_ids = game_ids[game_ids["GAME_DATE"] == date][game_ids["HOME_TEAM_NAME"] == home_team].drop_duplicates()
+    live_data = get_data(game_ids, live=True)
+    model_path = model_paths["3QPModel"]
+    model = load_model(model_path)
+    pred = model.predict(live_data).as_data_frame()
+    build_prediction_display(pred, live_data)
 
 def on_click_plot_score(nba_live_data):
     fig = px.line(nba_live_data, x="TIME_ACTUAL", y="SCORE_HOME")

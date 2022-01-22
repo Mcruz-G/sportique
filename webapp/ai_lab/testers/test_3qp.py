@@ -34,5 +34,7 @@ def test_3qp(model_name):
     print(y_pred[abs(error["Y"]) > 10])
     print(len(error[abs(error["Y"]) > 10])/ len(error))
     print(error.std())
+    print(model.explain(test_data))
+    print(model.performance(test_data))
 if __name__ == "__main__":
     test_3qp("3QPModel")

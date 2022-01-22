@@ -8,7 +8,7 @@ from contextlib import ExitStack
 from nba_api.stats.static import teams
 from nba_api.stats.endpoints import leaguegamefinder
 from sqlalchemy import create_engine, inspect
-from .data_warehouse_utils import db_paths, play_by_play_url, queries, load_nba_live_data, load_teams_data, load_game_ids
+from data_warehouse_utils import db_paths, play_by_play_url, queries, load_nba_live_data, load_teams_data, load_game_ids
 
 def get_games(season, league_id, season_type):
     gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable=season, league_id_nullable=league_id, season_type_nullable=season_type)
@@ -52,7 +52,6 @@ def get_game_ids(games, db_engine):
     
     incoming_game_ids = sorted(list(set(list(games["GAME_ID"].values))))
     most_recent_games = sorted(list(set(list(games[games["GAME_DATE"] >= today ]["GAME_ID"].values))))
-
     try:
         stored_game_ids_data = pd.read_sql(queries["game_ids"], db_engine)
         stored_game_ids = list(stored_game_ids_data["GAME_ID"].values)
@@ -99,7 +98,6 @@ def update_games_db(season, league_id, season_type):
 
         current_game_ids = list(game_ids["GAME_ID"].values)
         current_game_ids = sorted(list(set(current_game_ids)))
-        
         if stored_game_ids == current_game_ids:
             return
     except:
@@ -138,8 +136,6 @@ def update_nba_live_db():
         nba_live_data["CLOCK"] = play_by_play_data["clock"]
         nba_live_data["PLAYER_NAME"] = play_by_play_data["playerName"] 
         nba_live_data["PLAYER_NAME_2"] = play_by_play_data["playerNameI"] 
-        nba_live_data["FOUL_TECHNICAL"] = play_by_play_data["foulTechnicalTotal"]
-        nba_live_data["FOUL_PERSONAL"] = play_by_play_data["foulPersonalTotal"]
         nba_live_data["IS_FIELD_GOAL"] = play_by_play_data["isFieldGoal"]
         nba_live_data["SHOT_DISTANCE"] = play_by_play_data["shotDistance"].fillna(method="ffill")
         nba_live_data["ASSIST_TOTAL"] = play_by_play_data["assistTotal"].fillna(method="ffill")
@@ -148,6 +144,10 @@ def update_nba_live_db():
         nba_live_data["REBOUND_TOTAL"] = play_by_play_data["reboundTotal"].fillna(method="ffill")
         nba_live_data["X_LEGACY"] = play_by_play_data["xLegacy"].fillna(method="ffill")
         nba_live_data["Y_LEGACY"] = play_by_play_data["yLegacy"].fillna(method="ffill")
+        
+        if id in current_game_ids:
+            sql = 'DROP TABLE IF EXISTS {id}'
+            db_engine.execute(sql)
 
         nba_live_data.to_sql(name=id, con=db_engine, index=False, if_exists="append")
 
