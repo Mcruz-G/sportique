@@ -8,7 +8,7 @@ from contextlib import ExitStack
 from nba_api.stats.static import teams
 from nba_api.stats.endpoints import leaguegamefinder
 from sqlalchemy import create_engine, inspect
-from data_warehouse_utils import db_paths, play_by_play_url, queries, load_nba_live_data, load_teams_data, load_game_ids
+from .data_warehouse_utils import db_paths, play_by_play_url, queries, load_nba_live_data, load_teams_data, load_game_ids
 
 def get_games(season, league_id, season_type):
     gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable=season, league_id_nullable=league_id, season_type_nullable=season_type)
@@ -17,32 +17,7 @@ def get_games(season, league_id, season_type):
     return games
 
 def get_teams_data(games):
-    incoming_team_ids = list(games["TEAM_ID"].unique())
-    incoming_team_abbs = list(games["TEAM_ABBREVIATION"].unique())
-    incoming_team_names = list(games["TEAM_NAME"].unique())
-
-    try:
-        stored_data = load_teams_data()
-        stored_team_ids = list(stored_data["TEAM_ID"].values)
-        stored_team_abbs = list(stored_data["TEAM_ABBREVIATION"].values)
-        stored_team_names = list(stored_data["TEAM_NAME"].values)
-    
-    except:
-        stored_team_ids = []
-        stored_team_abbs = []
-        stored_team_names = []
-
-    new_team_ids = list(set(incoming_team_ids)-set(stored_team_ids))
-    new_team_abbs = list(set(incoming_team_abbs)-set(stored_team_abbs))
-    new_team_names = list(set(incoming_team_names)-set(stored_team_names))
-
-    teams_data = pd.DataFrame(columns=["TEAM_ID", "TEAM_ABBREVIATION", "TEAM_NAME"])
-    teams_data["TEAM_ID"] = new_team_ids
-    teams_data["TEAM_ABBREVIATION"] = new_team_abbs
-    teams_data["TEAM_NAME"] = new_team_names
-
-    if len(teams_data) > 0:
-        print(f"Loading new teams: {new_team_names}")
+    teams_data = games[["TEAM_ID", "TEAM_ABBREVIATION", "TEAM_NAME"]].drop_duplicates()
 
     return teams_data
 
@@ -146,7 +121,7 @@ def update_nba_live_db():
         nba_live_data["Y_LEGACY"] = play_by_play_data["yLegacy"].fillna(method="ffill")
         
         if id in current_game_ids:
-            sql = 'DROP TABLE IF EXISTS {id}'
+            sql = f"DROP TABLE IF EXISTS '{id}'"
             db_engine.execute(sql)
 
         nba_live_data.to_sql(name=id, con=db_engine, index=False, if_exists="append")
@@ -163,7 +138,7 @@ def update_db():
     season = "2021-22"
     league_id = "00"
     season_type = "Regular Season"
-    update_teams_db(season, league_id, season_type)
+    # update_teams_db(season, league_id, season_type)
     update_games_db(season, league_id, season_type)
     update_nba_live_db()
 

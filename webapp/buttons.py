@@ -1,18 +1,32 @@
+from turtle import home
 import streamlit as st
 from datetime import datetime
 import plotly.express as px
 from .ai_lab.trainers.utils import get_3qp_data, load_model, model_paths
-from .utils import build_prediction_display
+from .ai_lab.models.MMMFModel.MMMFModel import NBAModel 
+from .utils import compute_kyle_prediction, compute_n_avg, compute_league_avg_pace, compute_league_avg_total_score
+from .utils import build_3qp_display, build_mmmf_display, build_kyle_display, build_mr9zeros_display
 
-def build_get_final_score_prediction_button(game_ids, home_team, away_team, date):
-    build_get_final_score_prediction_button = st.button("Predict Score 10 mins ahead")
-    if build_get_final_score_prediction_button:
-        on_click_get_final_score_prediction(game_ids, home_team, away_team, date)    
 
-def build_get_final_score_prediction_button_2(game_ids, home_team, away_team, date):
-    build_get_final_score_prediction_button = st.button("Predict Score 10 mins ahead")
-    if build_get_final_score_prediction_button:
-        on_click_get_final_score_prediction(game_ids, home_team, away_team, date)    
+def build_get_3qp_score_prediction_button(game_ids, home_team, away_team, date, line):
+    build_get_3qp_score_prediction_button = st.button("Predict total score 10 minutes ahead ")
+    if build_get_3qp_score_prediction_button:
+        on_click_get_3qp_score_prediction(game_ids, home_team, away_team, date, line)    
+
+def build_get_mmmf_score_prediction_button(home_team, away_team, line):
+    build_get_mmmf_score_prediction_button = st.button("Predict final total score ")
+    if build_get_mmmf_score_prediction_button:
+        on_click_get_mmmf_score_prediction(home_team, away_team, line)    
+
+def build_get_kyles_score_prediction_button(game_ids, nba_live_data,home_team, away_team, date, line, n_avg):
+    build_get_kyles_score_prediction_button = st.button("Predict final total score  ")
+    if build_get_kyles_score_prediction_button:
+        on_click_get_kyles_score_prediction(game_ids, nba_live_data,home_team, away_team, date, line, n_avg)
+
+def build_get_mr9zeros_score_prediction_button(game_ids, nba_live_data, home_team, away_team, date, line, n_avg):
+    build_get_mr9zeros_score_prediction_button = st.button("Predict final total score   ")
+    if build_get_mr9zeros_score_prediction_button:
+        on_click_get_mr9zeros_score_prediction(game_ids, nba_live_data, home_team, away_team, date, line, n_avg)
 
 def build_plot_score_button(nba_live_data):
     build_plot_score_button = st.button("Plot game scores")
@@ -24,22 +38,39 @@ def build_get_today_games_button(game_ids):
     if build_get_today_games_button:
         on_click_get_today_games(game_ids)
 
-
-def on_click_get_final_score_prediction(game_ids, home_team, away_team, date):
+def on_click_get_3qp_score_prediction(game_ids, home_team, away_team, date, line):
     game_ids = game_ids[game_ids["GAME_DATE"] == date][game_ids["HOME_TEAM_NAME"] == home_team].drop_duplicates()
     live_data = get_3qp_data(game_ids, live=True)
     model_path = model_paths["3QPModel"]
     model = load_model(model_path)
     pred = model.predict(live_data).as_data_frame()
-    build_prediction_display(pred, live_data)
+    build_3qp_display(pred, live_data, line)
 
-def on_click_get_final_score_prediction(game_ids, home_team, away_team, date):
-    game_ids = game_ids[game_ids["GAME_DATE"] == date][game_ids["HOME_TEAM_NAME"] == home_team].drop_duplicates()
-    live_data = get_data(game_ids, live=True)
-    model_path = model_paths["3QPModel"]
-    model = load_model(model_path)
-    pred = model.predict(live_data).as_data_frame()
-    build_prediction_display(pred, live_data)
+def on_click_get_mmmf_score_prediction(home_team, away_team, line):
+    
+    model = NBAModel()
+    scores = model.get_scores(home_team, away_team) 
+    build_mmmf_display(scores, home_team, away_team, line)
+
+def on_click_get_kyles_score_prediction(game_ids, nba_live_data, home_team, away_team, date, line, n_avg):
+    home_avg_score = compute_n_avg("SCORE_HOME",home_team, game_ids, nba_live_data, date,n_avg)
+    home_opp_avg_score = compute_n_avg("SCORE_AWAY",home_team, game_ids, nba_live_data, date,n_avg)
+    away_avg_score = compute_n_avg("SCORE_HOME",away_team, game_ids, nba_live_data, date,n_avg)
+    away_opp_avg_score = compute_n_avg("SCORE_AWAY",away_team, game_ids, nba_live_data, date,n_avg)
+    home_avg_pace = compute_n_avg("PACE",home_team, game_ids, nba_live_data, date,n_avg)
+    away_avg_pace = compute_n_avg("PACE",away_team, game_ids, nba_live_data, date,n_avg)
+    league_avg = compute_league_avg_total_score()
+    pace_avg = compute_league_avg_pace()
+    final_score = compute_kyle_prediction(home_avg_score, home_opp_avg_score, away_avg_score, away_opp_avg_score,
+                    home_avg_pace, away_avg_pace, league_avg, pace_avg)
+    build_kyle_display(final_score, line)
+
+def on_click_get_mr9zeros_score_prediction(game_ids, nba_live_data, home_team, away_team, date, line, n_avg):
+    home_avg_score = compute_n_avg("SCORE_HOME",home_team, game_ids, nba_live_data, date,n_avg)
+    away_avg_score = compute_n_avg("SCORE_HOME",away_team, game_ids, nba_live_data, date,n_avg)
+    scores = dict(zip([home_team, away_team], [home_avg_score, away_avg_score]))
+    build_mr9zeros_display(scores, line)
+
 
 def on_click_plot_score(nba_live_data):
     fig = px.line(nba_live_data, x="TIME_ACTUAL", y="SCORE_HOME")

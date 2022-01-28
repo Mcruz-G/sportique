@@ -1,4 +1,6 @@
-import os 
+from ctypes.wintypes import INT
+import os
+from turtle import home 
 import pandas as pd
 from datetime import datetime
 import streamlit as st
@@ -61,6 +63,8 @@ def load_teams_data():
     engine = create_engine(db_name)
     query = queries["teams_data"]
     teams_data = pd.read_sql(query, engine)
+    teams_data["TEAM_ID"] = teams_data["TEAM_ID"].astype(int)
+    teams_data = teams_data.drop_duplicates()
     return teams_data
 
 def load_nba_live_data(game_ids, home_team, away_team, date):
@@ -74,6 +78,8 @@ def load_nba_live_data(game_ids, home_team, away_team, date):
         nba_live_data = nba_live_data.sort_values(by="TIME_ACTUAL")
         nba_live_data["TOTAL_SCORE"] = (nba_live_data["SCORE_HOME"].astype(float) + nba_live_data["SCORE_AWAY"].astype(float))
         nba_live_data["SPREAD"] = (nba_live_data["SCORE_HOME"].astype(float) - nba_live_data["SCORE_AWAY"].astype(float))
+        nba_live_data["SCORE_AWAY"] = nba_live_data["SCORE_AWAY"].astype(float)
+        nba_live_data["SCORE_HOME"] = nba_live_data["SCORE_HOME"].astype(float)
         columns = ["TIME_ACTUAL", "PERIOD", "SCORE_HOME", "SCORE_AWAY", "TOTAL_SCORE", "SPREAD"]
         curr_columns = list(nba_live_data.columns)
         curr_columns = list(filter(lambda d: d not in columns, curr_columns))
@@ -82,3 +88,8 @@ def load_nba_live_data(game_ids, home_team, away_team, date):
     return nba_live_data
 
 
+def get_abbs(home_team, away_team):
+    teams_data = load_teams_data()
+    home_team_abb = list(teams_data[teams_data["TEAM_NAME"] == home_team]["TEAM_ABBREVIATION"].values)[0]
+    away_team_abb = list(teams_data[teams_data["TEAM_NAME"] == away_team]["TEAM_ABBREVIATION"].values)[0]
+    return home_team_abb, away_team_abb

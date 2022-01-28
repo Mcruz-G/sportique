@@ -17,7 +17,7 @@ def train_3qp(model_name):
     h2o.init()
     model = H2ORandomForestEstimator(model_name)
     game_ids = load_game_ids()
-    game_ids = game_ids.iloc[:int(len(game_ids) * 0.8)] 
+    game_ids = game_ids.iloc[:int(len(game_ids) * 1)] 
     data = get_3qp_data(game_ids)
     model = fit_data(model, data)
     save_model(model, model_dir)
