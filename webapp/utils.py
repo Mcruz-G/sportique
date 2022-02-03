@@ -1,14 +1,12 @@
-from audioop import avg
 import os, sys
-from re import L
 import pandas as pd
-from data_warehouse.data_warehouse_utils import load_teams_data
 import streamlit as st
+from data_warehouse.data_warehouse_utils import load_teams_data
 
 data_warehouse_path = os.environ["SP_DATA_WAREHOUSE_PATH"]
 sys.path.insert(1, data_warehouse_path)
 
-from data_warehouse_utils import load_game_ids, load_nba_live_data
+from data_warehouse_utils import load_nba_live_data
 
 def build_linear_regressor_display(prediction):
     value = f"{int(prediction)}    +/- {3}"

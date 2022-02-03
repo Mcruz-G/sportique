@@ -1,10 +1,10 @@
 import numpy as np
 import streamlit as st
-from datetime import datetime
 import plotly.express as px
+from datetime import datetime
 from .ai_lab.models.MMMFModel.MMMFModel import NBAModel 
-from .ai_lab.trainers.train_linear_regressor import train_linear_regressor
 from .ai_lab.trainers.utils import get_3qp_data, load_model, model_paths
+from .ai_lab.trainers.train_linear_regressor import train_linear_regressor
 from .utils import compute_kyle_prediction, compute_n_avg, compute_league_avg_pace, compute_league_avg_total_score
 from .utils import build_linear_regressor_display, build_3qp_display, build_mmmf_display, build_kyle_display, build_mr9zeros_display
 

@@ -1,5 +1,5 @@
-from datetime import date, datetime
 import streamlit as st
+from datetime import datetime
 
 def build_date_input():
     date_input = st.date_input(

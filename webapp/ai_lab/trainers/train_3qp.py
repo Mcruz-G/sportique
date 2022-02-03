@@ -1,4 +1,5 @@
-import h2o, os, sys, shutil
+import h2o
+import os, sys, shutil
 from h2o.estimators.gbm import H2OGradientBoostingEstimator
 from h2o.estimators import H2ORandomForestEstimator
 

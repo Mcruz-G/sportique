@@ -1,14 +1,13 @@
-import os, sys, h2o
-from turtle import home
-from platform import libc_ver
-import pandas as pd
+import h2o
+import os, sys
 import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 data_warehouse_path = os.environ["SP_DATA_WAREHOUSE_PATH"]
 sys.path.insert(1, data_warehouse_path)
 
 from data_warehouse_utils import load_game_ids, load_teams_data, load_nba_live_data
-from tqdm import tqdm
 
 def get_teams_sma_score():
     teams = list(load_teams_data()["TEAM_NAME"].values)
