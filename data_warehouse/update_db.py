@@ -1,14 +1,11 @@
-from datetime import date
-from hashlib import new
 import requests 
 import pandas as pd
-from datetime import datetime
 from tqdm import tqdm
-from contextlib import ExitStack
+from datetime import datetime
 from nba_api.stats.static import teams
-from nba_api.stats.endpoints import leaguegamefinder
 from sqlalchemy import create_engine, inspect
-from .data_warehouse_utils import db_paths, play_by_play_url, queries, load_nba_live_data, load_teams_data, load_game_ids
+from nba_api.stats.endpoints import leaguegamefinder
+from .data_warehouse_utils import db_paths, play_by_play_url, queries, load_game_ids
 
 def get_games(season, league_id, season_type):
     gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable=season, league_id_nullable=league_id, season_type_nullable=season_type)
