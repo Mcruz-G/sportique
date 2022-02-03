@@ -9,7 +9,7 @@ from webapp.kyle_input import build_kyle_input
 from webapp.line_input import build_line_input
 from webapp.date_input import build_date_input
 from webapp.buttons import build_plot_score_button
-from webapp.buttons import build_get_3qp_score_prediction_button, build_get_mmmf_score_prediction_button
+from webapp.buttons import build_get_mmmf_score_prediction_button
 from webapp.buttons import build_get_kyles_score_prediction_button
 from webapp.buttons import build_get_mr9zeros_score_prediction_button, build_get_linear_regressor_button
 import h2o
@@ -32,8 +32,6 @@ if __name__ == "__main__":
     
     st.subheader("")    
     st.subheader("")   
-    
-    # st.subheader("Ask everyone's opinion")   
     
     st.subheader("Linear Predictor")   
      
