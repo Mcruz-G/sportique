@@ -11,7 +11,7 @@ from webapp.date_input import build_date_input
 from webapp.buttons import build_plot_score_button
 from webapp.buttons import build_get_3qp_score_prediction_button, build_get_mmmf_score_prediction_button
 from webapp.buttons import build_get_kyles_score_prediction_button
-from webapp.buttons import build_get_mr9zeros_score_prediction_button
+from webapp.buttons import build_get_mr9zeros_score_prediction_button, build_get_linear_regressor_button
 import h2o
 
 if __name__ == "__main__":
@@ -35,10 +35,10 @@ if __name__ == "__main__":
     
     # st.subheader("Ask everyone's opinion")   
     
-    st.subheader("Random Forest Model")   
+    st.subheader("Linear Predictor")   
      
     st.subheader("")    
-    build_get_3qp_score_prediction_button(game_ids, home_team, away_team, date, line)
+    build_get_linear_regressor_button(nba_live_data)
     st.subheader("")
 
     st.subheader("MMMF Model")   

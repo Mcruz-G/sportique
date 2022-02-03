@@ -1,12 +1,17 @@
-from turtle import home
+import numpy as np
 import streamlit as st
 from datetime import datetime
 import plotly.express as px
-from .ai_lab.trainers.utils import get_3qp_data, load_model, model_paths
 from .ai_lab.models.MMMFModel.MMMFModel import NBAModel 
+from .ai_lab.trainers.train_linear_regressor import train_linear_regressor
+from .ai_lab.trainers.utils import get_3qp_data, load_model, model_paths
 from .utils import compute_kyle_prediction, compute_n_avg, compute_league_avg_pace, compute_league_avg_total_score
-from .utils import build_3qp_display, build_mmmf_display, build_kyle_display, build_mr9zeros_display
+from .utils import build_linear_regressor_display, build_3qp_display, build_mmmf_display, build_kyle_display, build_mr9zeros_display
 
+def build_get_linear_regressor_button(nba_live_data):
+    build_get_linear_regressor_button = st.button("Predict final total score     ")
+    if build_get_linear_regressor_button:
+        on_click_get_linear_regressor_button(nba_live_data)
 
 def build_get_3qp_score_prediction_button(game_ids, home_team, away_team, date, line):
     build_get_3qp_score_prediction_button = st.button("Predict total score 10 minutes ahead ")
@@ -37,6 +42,12 @@ def build_get_today_games_button(game_ids):
     build_get_today_games_button = st.button("Get today games")
     if build_get_today_games_button:
         on_click_get_today_games(game_ids)
+
+def on_click_get_linear_regressor_button(nba_live_data):
+    t = 120
+    model = train_linear_regressor(nba_live_data)
+    prediction = model.predict(np.array([[t]]))
+    build_linear_regressor_display(prediction)
 
 def on_click_get_3qp_score_prediction(game_ids, home_team, away_team, date, line):
     game_ids = game_ids[game_ids["GAME_DATE"] == date][game_ids["HOME_TEAM_NAME"] == home_team].drop_duplicates()

@@ -10,6 +10,10 @@ sys.path.insert(1, data_warehouse_path)
 
 from data_warehouse_utils import load_game_ids, load_nba_live_data
 
+def build_linear_regressor_display(prediction):
+    value = f"{int(prediction)}    +/- {3}"
+    st.metric(label="Predicted Score:", value=value)
+
 def build_3qp_display(prediction, live_data, line):
     live_data = live_data.as_data_frame()
     predicted_value = list(prediction.iloc[[-1]].values)[0]
