@@ -1,4 +1,4 @@
-import datetime
+import h2o
 import pandas as pd
 import streamlit as st
 from data_warehouse.update_db import update_db
@@ -12,7 +12,6 @@ from webapp.buttons import build_plot_score_button
 from webapp.buttons import build_get_mmmf_score_prediction_button
 from webapp.buttons import build_get_kyles_score_prediction_button
 from webapp.buttons import build_get_mr9zeros_score_prediction_button, build_get_linear_regressor_button
-import h2o
 
 if __name__ == "__main__":
     h2o.init()
