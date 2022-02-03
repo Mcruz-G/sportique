@@ -1,4 +1,3 @@
-import h2o
 import pandas as pd
 import streamlit as st
 from data_warehouse.update_db import update_db
@@ -14,7 +13,6 @@ from webapp.buttons import build_get_kyles_score_prediction_button
 from webapp.buttons import build_get_mr9zeros_score_prediction_button, build_get_linear_regressor_button
 
 if __name__ == "__main__":
-    h2o.init()
     st.title("Welcome to Sportique, Angel. It's good to see you again.")
     
     st.subheader("")
