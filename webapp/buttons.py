@@ -1,3 +1,7 @@
+import os, sys
+data_warehouse_path = os.environ["SP_DATA_WAREHOUSE_PATH"]
+sys.path.insert(1, data_warehouse_path)
+
 import numpy as np
 import streamlit as st
 import plotly.express as px
@@ -7,6 +11,38 @@ from .ai_lab.trainers.utils import get_3qp_data, load_model, model_paths
 from .ai_lab.trainers.train_linear_regressor import train_linear_regressor
 from .utils import compute_kyle_prediction, compute_n_avg, compute_league_avg_pace, compute_league_avg_total_score
 from .utils import build_linear_regressor_display, build_3qp_display, build_mmmf_display, build_kyle_display, build_mr9zeros_display
+from data_warehouse_utils import get_abbs
+
+def build_get_everyones_opinion_button(game_ids, nba_live_data,home_team, away_team, date, line, n_avg):
+    build_get_everyones_opinion_button = st.button("Average all the predictions")
+    home_team_abb, away_team_abb = get_abbs(home_team, away_team)
+
+    if build_get_everyones_opinion_button:
+        t = 120
+        linear_model = train_linear_regressor(nba_live_data)
+        linear_model_prediction = linear_model.predict(np.array([[t]]))
+
+        mmmf_model = NBAModel()
+        mmmf_model_prediction = mmmf_model.get_scores(home_team_abb, away_team_abb)
+        mmmf_model_prediction = int(sum(list(mmmf_model_prediction.values())))
+
+        home_avg_score = compute_n_avg("SCORE_HOME",home_team, game_ids, nba_live_data, date,n_avg)
+        home_opp_avg_score = compute_n_avg("SCORE_AWAY",home_team, game_ids, nba_live_data, date,n_avg)
+        away_avg_score = compute_n_avg("SCORE_HOME",away_team, game_ids, nba_live_data, date,n_avg)
+        away_opp_avg_score = compute_n_avg("SCORE_AWAY",away_team, game_ids, nba_live_data, date,n_avg)
+        home_avg_pace = compute_n_avg("PACE",home_team, game_ids, nba_live_data, date,n_avg)
+        away_avg_pace = compute_n_avg("PACE",away_team, game_ids, nba_live_data, date,n_avg)
+        league_avg = compute_league_avg_total_score()
+        pace_avg = compute_league_avg_pace()
+        kyle_model_prediction = compute_kyle_prediction(home_avg_score, home_opp_avg_score, away_avg_score, away_opp_avg_score,
+                        home_avg_pace, away_avg_pace, league_avg, pace_avg)
+
+        mr9zeros_model_prediction = home_avg_score + away_avg_score
+
+        everyones_opinion_prediction = linear_model_prediction + mmmf_model_prediction + kyle_model_prediction + mr9zeros_model_prediction
+        everyones_opinion_prediction /= 4
+        build_kyle_display(everyones_opinion_prediction, line)
+    
 
 def build_get_linear_regressor_button(nba_live_data):
     build_get_linear_regressor_button = st.button("Predict final total score     ")
@@ -108,3 +144,4 @@ def on_click_get_today_games(game_ids):
         data_to_show = game_ids[["HOME_TEAM_NAME", "AWAY_TEAM_NAME"]]
         data_to_show.rename({"HOME_TEAM_NAME" : "Home", "AWAY_TEAM_NAME" : "Away"})
         st.table(data = data_to_show)
+

@@ -111,7 +111,7 @@ def update_nba_live_db():
         nba_live_data["IS_FIELD_GOAL"] = play_by_play_data["isFieldGoal"]
         nba_live_data["SHOT_DISTANCE"] = play_by_play_data["shotDistance"].fillna(method="ffill")
         nba_live_data["ASSIST_TOTAL"] = play_by_play_data["assistTotal"].fillna(method="ffill")
-        nba_live_data["TURNOVER_TOTAL"] = play_by_play_data["turnoverTotal"].fillna(method="ffill")
+        # nba_live_data["TURNOVER_TOTAL"] = play_by_play_data["turnoverTotal"].fillna(method="ffill")
         nba_live_data["POINTS_TOTAL"] = play_by_play_data["pointsTotal"].fillna(method="ffill")
         nba_live_data["REBOUND_TOTAL"] = play_by_play_data["reboundTotal"].fillna(method="ffill")
         nba_live_data["X_LEGACY"] = play_by_play_data["xLegacy"].fillna(method="ffill")

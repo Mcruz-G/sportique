@@ -4,6 +4,7 @@ from data_warehouse.update_db import update_db
 from data_warehouse.data_warehouse_utils import  load_game_ids, load_teams_data, load_nba_live_data, get_abbs 
 from webapp.selectbox import build_selectbox
 from webapp.mr9zeros_input import build_mr9zeros_input
+from webapp.everyone_op_input import build_everyone_op_input
 from webapp.kyle_input import build_kyle_input
 from webapp.line_input import build_line_input
 from webapp.date_input import build_date_input
@@ -11,6 +12,7 @@ from webapp.buttons import build_plot_score_button
 from webapp.buttons import build_get_mmmf_score_prediction_button
 from webapp.buttons import build_get_kyles_score_prediction_button
 from webapp.buttons import build_get_mr9zeros_score_prediction_button, build_get_linear_regressor_button
+from webapp.buttons import build_get_everyones_opinion_button
 
 if __name__ == "__main__":
     st.title("Welcome to Sportique, Angel. It's good to see you again.")
@@ -28,6 +30,14 @@ if __name__ == "__main__":
     nba_live_data = load_nba_live_data(game_ids, home_team, away_team, date)
     
     st.subheader("")    
+    st.subheader("")   
+    
+    st.subheader("Get everyone's opinion")   
+     
+    st.subheader("")    
+    n_avg = build_everyone_op_input()
+    build_get_everyones_opinion_button(game_ids, nba_live_data, home_team, away_team, date, line, n_avg)    
+
     st.subheader("")   
     
     st.subheader("Linear Predictor")   

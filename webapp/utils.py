@@ -1,4 +1,3 @@
-import os, sys
 import pandas as pd
 import streamlit as st
 from data_warehouse.data_warehouse_utils import load_teams_data, load_nba_live_data
