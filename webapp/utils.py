@@ -1,5 +1,8 @@
+from types import new_class
 import pandas as pd
+import numpy as np
 import streamlit as st
+from tqdm import tqdm
 from data_warehouse.data_warehouse_utils import load_teams_data, load_nba_live_data
 
 def build_linear_regressor_display(prediction):
@@ -34,10 +37,14 @@ def build_mr9zeros_display(scores, line):
     st.metric(label= home_team, value=int(scores[home_team]))
     st.metric(label= away_team, value=int(scores[away_team]))
 
-def get_last_n_games(team, game_ids, n_avg, date):
+def get_team_games(team, game_ids):
     home_games = game_ids[game_ids["HOME_TEAM_NAME"] == team]
     away_games = game_ids[game_ids["AWAY_TEAM_NAME"] == team]
     team_games = pd.concat([home_games, away_games])
+    return team_games
+
+def get_last_n_games(team, game_ids, n_avg, date):
+    team_games = get_team_games(team, game_ids)
     team_games = team_games[team_games["GAME_DATE"] < date]
     team_games = team_games.sort_values(by="GAME_DATE")
     team_games = team_games.iloc[-n_avg:]
@@ -88,3 +95,32 @@ def compute_mr9zeros_prediction(home_avg_score, away_avg_score):
 
     prediction = home_avg_score + away_avg_score
     return prediction
+
+def get_team_analytics(game_ids, team):
+    team_games = get_team_games(team, game_ids)
+    scores = pd.DataFrame()
+
+    for game in tqdm(team_games.itertuples()):
+        if team == game.HOME_TEAM_NAME:
+            target_column = "SCORE_HOME"
+        else:
+            target_column = "SCORE_AWAY"
+
+        nba_live_data = load_nba_live_data(game_ids, game.HOME_TEAM_NAME, game.AWAY_TEAM_NAME, game.GAME_DATE)
+        nba_live_data = nba_live_data[nba_live_data.PERIOD <= 4]
+        max_game_scores = nba_live_data.groupby(["PERIOD"]).agg({target_column : max})
+        max_game_scores.columns = [col.strip() for col in max_game_scores.columns.values]
+        max_game_scores.reset_index(inplace=True)
+        
+        min_game_scores = nba_live_data.groupby(["PERIOD"]).agg({target_column : min})
+        min_game_scores.columns = [col.strip() for col in min_game_scores.columns.values]
+        min_game_scores.reset_index(inplace=True)
+
+        new_scores = max_game_scores[target_column] - min_game_scores[target_column]
+        new_scores = pd.DataFrame(data={"PERIOD": list(range(len(new_scores))), "SCORE" : new_scores})
+
+        scores = pd.concat([scores, new_scores], axis=0)
+    scores = scores.groupby(["PERIOD"]).agg({"SCORE" : [np.mean, np.std]})
+    scores.reset_index(inplace=True)
+
+    return scores

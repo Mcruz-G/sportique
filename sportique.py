@@ -12,7 +12,7 @@ from webapp.buttons import build_plot_score_button
 from webapp.buttons import build_get_mmmf_score_prediction_button
 from webapp.buttons import build_get_kyles_score_prediction_button
 from webapp.buttons import build_get_mr9zeros_score_prediction_button, build_get_linear_regressor_button
-from webapp.buttons import build_get_everyones_opinion_button
+from webapp.buttons import build_get_everyones_opinion_button, build_plot_score_analytics_button
 
 if __name__ == "__main__":
     st.title("Welcome to Sportique, Angel. It's good to see you again.")
@@ -70,6 +70,10 @@ if __name__ == "__main__":
 
     st.subheader("")    
     build_plot_score_button(nba_live_data)
+    st.subheader("")
+
+    st.subheader("")    
+    build_plot_score_analytics_button(game_ids, home_team, away_team)
     st.subheader("")
 
     st.subheader("... Talk to our admin if you'd like to add any functionality :)")

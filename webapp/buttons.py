@@ -2,6 +2,10 @@ import os, sys
 data_warehouse_path = os.environ["SP_DATA_WAREHOUSE_PATH"]
 sys.path.insert(1, data_warehouse_path)
 
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use('TkAgg')
+
 import numpy as np
 import streamlit as st
 import plotly.express as px
@@ -9,9 +13,9 @@ from datetime import datetime
 from .ai_lab.models.MMMFModel.MMMFModel import NBAModel 
 from .ai_lab.trainers.utils import get_3qp_data, load_model, model_paths
 from .ai_lab.trainers.train_linear_regressor import train_linear_regressor
-from .utils import compute_kyle_prediction, compute_n_avg, compute_league_avg_pace, compute_league_avg_total_score
+from .utils import compute_kyle_prediction, compute_n_avg, compute_league_avg_pace, compute_league_avg_total_score, get_team_analytics, get_team_games
 from .utils import build_linear_regressor_display, build_3qp_display, build_mmmf_display, build_kyle_display, build_mr9zeros_display
-from data_warehouse_utils import get_abbs
+from data_warehouse_utils import get_abbs, load_nba_live_data
 
 def build_get_everyones_opinion_button(game_ids, nba_live_data,home_team, away_team, date, line, n_avg):
     build_get_everyones_opinion_button = st.button("Average all the predictions")
@@ -74,6 +78,11 @@ def build_plot_score_button(nba_live_data):
     if build_plot_score_button:
         on_click_plot_score(nba_live_data)
 
+def build_plot_score_analytics_button(game_ids, home_team, away_team):
+    build_plot_score_analytics_button = st.button("Plot analytics")
+    if build_plot_score_analytics_button:
+        on_click_plot_score_analytics(game_ids, home_team, away_team)
+
 def build_get_today_games_button(game_ids):
     build_get_today_games_button = st.button("Get today games")
     if build_get_today_games_button:
@@ -134,6 +143,12 @@ def on_click_plot_score(nba_live_data):
     st.plotly_chart(fig)
     total_score = nba_live_data["TOTAL_SCORE"].iloc[-1]
     st.subheader(f"Current Total Score: {total_score}")
+
+def on_click_plot_score_analytics(game_ids, home_team, away_team):
+    for team in [home_team, away_team]:
+        st.subheader(f"{team}'s Score Analytics")   
+        team_analytics = get_team_analytics(game_ids, team)
+        st.bar_chart(team_analytics["SCORE"].loc[:,["mean"]])
 
 def on_click_get_today_games(game_ids):
     date = datetime.now().date()

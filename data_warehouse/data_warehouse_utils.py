@@ -29,6 +29,7 @@ queries = {
 }
 
 def get_id(game_ids, home_team, away_team, date):
+
     target_game = game_ids[game_ids["GAME_DATE"] == date]
     target_game = target_game[target_game["HOME_TEAM_NAME"] == home_team]
     target_game = target_game[target_game["AWAY_TEAM_NAME"] == away_team]
