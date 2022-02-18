@@ -1,9 +1,13 @@
+from statistics import mean
 from types import new_class
 import pandas as pd
+import os, sys
 import numpy as np
 import streamlit as st
 from tqdm import tqdm
-from data_warehouse.data_warehouse_utils import load_teams_data, load_nba_live_data
+data_warehouse_path = os.environ["SP_DATA_WAREHOUSE_PATH"]
+sys.path.insert(1, data_warehouse_path)
+from data_warehouse_utils import load_teams_data, load_nba_live_data
 
 def build_linear_regressor_display(prediction):
     value = f"{int(prediction)}    +/- {3}"
@@ -51,6 +55,25 @@ def get_last_n_games(team, game_ids, n_avg, date):
 
     return team_games
 
+def compute_mean_n(team, game_ids, n_avg, date):
+    last_n_games = get_last_n_games(team, game_ids, n_avg, date)
+    dates = list(last_n_games["GAME_DATE"])
+    mean = 0 
+    num_games = len(dates)
+
+    for date in dates:
+        game = last_n_games[last_n_games["GAME_DATE"] == date]
+        home_team, away_team = game["HOME_TEAM_NAME"].iloc[0], game["AWAY_TEAM_NAME"].iloc[0]
+        game_data = load_nba_live_data(game_ids, home_team, away_team, date)
+        if home_team == team:
+            target_column = "SCORE_HOME"
+        else:
+            target_column = "SCORE_AWAY"
+        mean += game_data[target_column].iloc[-1]
+    mean /= num_games
+    return mean
+
+
 def compute_n_avg(target_column, team, game_ids, nba_live_data, date, n_avg):
     game_ids = game_ids.drop_duplicates()
     teams_data = load_teams_data()
@@ -78,7 +101,7 @@ def compute_n_avg(target_column, team, game_ids, nba_live_data, date, n_avg):
 
 
 def compute_league_avg_total_score():
-    return 223.6
+    return 230.6
 
 def compute_league_avg_pace():
     return 99.1
