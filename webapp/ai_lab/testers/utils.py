@@ -1,6 +1,7 @@
 import os, sys, h2o
 import pandas as pd
 import numpy as np 
+import joblib
 
 data_warehouse_path = os.environ["SP_DATA_WAREHOUSE_PATH"]
 sys.path.insert(1, data_warehouse_path)
@@ -130,11 +131,17 @@ def fit_data(model, data):
     model.train(x=x,y=y, training_frame=data)
     return model
 
-def save_model(model, save_path):
-    h2o.save_model(model=model, path=save_path, force=True)
+def save_model(model, save_path, mode=None):
+    if mode == "h20":
+        h2o.save_model(model=model, path=save_path, force=True)
+    else:
+        joblib.dump(model, save_path)
 
-def load_model(model_path):
-    model = h2o.load_model(model_path)
+def load_model(model_path, mode=None):
+    if mode == "h20":
+        model = h2o.load_model(model_path)
+    else:
+        model = joblib.load(model_path)
     return model
 
 model_paths = {
@@ -142,4 +149,5 @@ model_paths = {
     "4QPModel" : os.environ["SP_MODELS_PATH"] + "4QPModel/4QPModel",
     "HomeTeamModel" : os.environ["SP_MODELS_PATH"] + "HomeTeamModel/HomeTeamModel",
     "AwayTeamModel" : os.environ["SP_MODELS_PATH"] + "AwayTeamModel/AwayTeamModel",
+    "BLPModel" : os.environ["SP_MODELS_PATH"] + "BMPModel/BMPModel.sav",
 }

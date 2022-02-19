@@ -13,6 +13,12 @@ def build_linear_regressor_display(prediction):
     value = f"{int(prediction)}    +/- {3}"
     st.metric(label="Predicted Score:", value=value)
 
+def build_prediction_display(prediction):
+    betting_result = "Over" if prediction["over"] else "Under"
+    confidence = round(prediction["confidence"],3)
+    value = f"Betting Result: {betting_result}" + f" //  Confidence: {confidence}"
+    st.metric(label="Betting result:", value=value)
+
 def build_3qp_display(prediction, live_data, line):
     live_data = live_data.as_data_frame()
     predicted_value = list(prediction.iloc[[-1]].values)[0]

@@ -8,11 +8,9 @@ from webapp.everyone_op_input import build_everyone_op_input
 from webapp.kyle_input import build_kyle_input
 from webapp.line_input import build_line_input
 from webapp.date_input import build_date_input
-from webapp.buttons import build_plot_score_button
-from webapp.buttons import build_get_mmmf_score_prediction_button
-from webapp.buttons import build_get_kyles_score_prediction_button
-from webapp.buttons import build_get_mr9zeros_score_prediction_button, build_get_linear_regressor_button
-from webapp.buttons import build_get_everyones_opinion_button, build_plot_score_analytics_button
+from webapp.buttons_v1 import build_get_everyones_opinion_button
+from webapp.buttons_v1 import build_plot_score_button, build_plot_score_analytics_button
+from webapp.buttons_v1 import build_get_mmmf_score_prediction_button, build_get_linear_regressor_button, build_get_blp_prediction_button
 
 if __name__ == "__main__":
     st.title("Welcome to Sportique, Angel. It's good to see you again.")
@@ -35,15 +33,22 @@ if __name__ == "__main__":
     st.subheader("Get everyone's opinion")   
      
     st.subheader("")    
-    n_avg = build_everyone_op_input()
-    build_get_everyones_opinion_button(game_ids, nba_live_data, home_team, away_team, date, line, n_avg)    
+    build_get_everyones_opinion_button(game_ids, nba_live_data, home_team, away_team, date, line)    
+
+    st.subheader("")   
+    
+    st.subheader("Betting Line Predictor Model")   
+     
+    st.subheader("")    
+    build_get_blp_prediction_button(game_ids, home_team, away_team, date, line)
+    st.subheader("")
 
     st.subheader("")   
     
     st.subheader("Linear Predictor")   
      
     st.subheader("")    
-    build_get_linear_regressor_button(nba_live_data)
+    build_get_linear_regressor_button(nba_live_data, line)
     st.subheader("")
 
     st.subheader("MMMF Model")   
@@ -52,20 +57,6 @@ if __name__ == "__main__":
     build_get_mmmf_score_prediction_button(home_team_abb, away_team_abb, line)
     st.subheader("")
 
-    st.subheader("Kyle's Model")   
-    
-    st.subheader("")    
-    n_avg = build_kyle_input()
-    build_get_kyles_score_prediction_button(game_ids, nba_live_data, home_team, away_team, date, line, n_avg)
-    st.subheader("")
-    
-    st.subheader("Mr. 9zeros Model")   
-
-    st.subheader("")    
-    n_avg = build_mr9zeros_input()
-    build_get_mr9zeros_score_prediction_button(game_ids, nba_live_data, home_team, away_team, date, line, n_avg)
-    st.subheader("")
-    
     st.header("Visualize some analytics")   
 
     st.subheader("")    
