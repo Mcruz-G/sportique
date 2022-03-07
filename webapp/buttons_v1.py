@@ -76,8 +76,8 @@ def on_click_get_linear_regressor_button(nba_live_data, line):
     model = train_linear_regressor(nba_live_data)
     model_pred = model.predict(np.array([[t]]))
     model_pred = model_pred[0][0]
-    r2 = 1 - line / model_pred
-    prediction = {"over" : model_pred > line, "confidence" : r2}
+    r2 = model_pred / line
+    prediction = {"over" : model_pred > line, "confidence" : r2, "num_pred" : model_pred}
     return prediction
 
 
@@ -86,8 +86,8 @@ def on_click_get_mmmf_score_prediction(home_team, away_team, line):
     model = NBAModel()
     scores = model.get_scores(home_team, away_team) 
     model_pred = sum(list(scores.values()))
-    r2 = 1 - line / model_pred
-    prediction = {"over" : model_pred > line, "confidence" : r2}
+    r2 = 1 - model_pred / line
+    prediction = {"over" : model_pred > line, "confidence" : r2, "num_pred" : model_pred}
     return prediction
 
 def on_click_get_blp_prediction(game_ids, home_team, away_team, date, line):
@@ -105,7 +105,7 @@ def on_click_get_blp_prediction(game_ids, home_team, away_team, date, line):
     model_pred = model.predict(X)[0]
     
     r2 = model_pred
-    prediction = {"over" : model_pred > 0.5, "confidence" : r2}
+    prediction = {"over" : model_pred > 0.5, "confidence" : r2, "num_pred" : line * (1 + model_pred)}
     return prediction
 
 def on_click_plot_score(nba_live_data):
